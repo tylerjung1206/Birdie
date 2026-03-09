@@ -12,7 +12,9 @@
     "dev:all": "concurrently -k \"npm run server\" \"wait-on tcp:3001 && npm run dev\"",
     "build": "vite build",
     "preview": "vite preview",
-    "dist": "npm run build && electron-builder --win --x64"
+    "dist": "npm run build && electron-builder --win --x64",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:win": "npm run build && electron-builder --win --x64"
   },
   "dependencies": {
     "electron-store": "^9.0.0",
@@ -32,6 +34,7 @@
   "build": {
     "appId": "com.birdie.golftracker",
     "productName": "Birdie",
+    "icon": "public/birdie-logo.png",
     "directories": {
       "output": "release"
     },
@@ -40,10 +43,18 @@
       "electron/**/*",
       "package.json"
     ],
-    "win": {
-      "target": [
-        "nsis"
+    "mac": {
+      "target": ["dmg"],
+      "category": "public.app-category.sports-fitness"
+    },
+    "dmg": {
+      "contents": [
+        { "x": 130, "y": 220 },
+        { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
       ]
+    },
+    "win": {
+      "target": ["nsis"]
     },
     "nsis": {
       "oneClick": false,

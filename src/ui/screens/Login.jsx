@@ -1,18 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { login, register } from "../lib/api.js";
 
 export default function Login({ onLogin }) {
   const [mode, setMode] = useState("login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [apiUrl, setApiUrl] = useState("http://localhost:3001");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const configAvailable = typeof window !== "undefined" && window.birdieConfig;
 
+  useEffect(() => {
+    if (!configAvailable) return;
+    window.birdieConfig.get().then((c) => {
+      if (c?.apiUrl) setApiUrl(c.apiUrl);
+    });
+  }, [configAvailable]);
+
+  function saveApiUrl() {
+    const url = apiUrl.trim() || "http://localhost:3001";
+    setApiUrl(url);
+    window.birdieConfig.set({ apiUrl: url });
+  }
+
   async function submit(e) {
     e.preventDefault();
     setError("");
+    saveApiUrl();
     setLoading(true);
     try {
       const data = mode === "login" ? await login(username, password) : await register(username, password);
@@ -20,7 +35,11 @@ export default function Login({ onLogin }) {
       onLogin(data.user);
     } catch (err) {
       const msg = err?.data?.error || err?.message || "Something went wrong";
-      const isNetworkError = msg === "Failed to fetch" || err?.name === "TypeError";
+      const isNetworkError =
+        msg?.includes?.("fetch failed") ||
+        msg === "Failed to fetch" ||
+        msg?.includes?.("Cannot connect") ||
+        err?.name === "TypeError";
       setError(
         isNetworkError
           ? "Couldn't connect to the server. Start the backend: cd backend && npm start"
@@ -56,6 +75,19 @@ export default function Login({ onLogin }) {
         </div>
 
         <form onSubmit={submit}>
+          <div className="field" style={{ marginBottom: 14 }}>
+            <label>Server URL</label>
+            <input
+              value={apiUrl}
+              onChange={(e) => setApiUrl(e.target.value)}
+              onBlur={saveApiUrl}
+              placeholder="http://localhost:3001"
+              style={{ fontSize: 13 }}
+            />
+            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 11, marginTop: 4 }}>
+              Leave as default for local backend, or enter your deployed backend URL.
+            </p>
+          </div>
           <div className="field" style={{ marginBottom: 14 }}>
             <label>Username</label>
             <input

@@ -83,10 +83,17 @@ async function initConfig() {
 }
 
 function createWindow() {
+  const iconPath = path.join(
+    __dirname,
+    "..",
+    isDev ? "public" : "dist",
+    "birdie-logo.png"
+  );
   const win = new BrowserWindow({
     width: 1100,
     height: 720,
     backgroundColor: "#0b1f14",
+    icon: iconPath,
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs")
     }
@@ -131,7 +138,17 @@ app.whenReady().then(async () => {
     if (token) headers.Authorization = `Bearer ${token}`;
     const opts = { method, headers };
     if (body) opts.body = JSON.stringify(body);
-    const res = await fetch(url, opts);
+    let res;
+    try {
+      res = await fetch(url, opts);
+    } catch (err) {
+      const msg = err?.cause?.code === "ECONNREFUSED"
+        ? "Cannot connect to the server. Is the backend running? Try: cd backend && npm start"
+        : err?.message || "Network error";
+      const e = new Error(msg);
+      e.original = err;
+      throw e;
+    }
     const text = await res.text();
     let data;
     try {
