@@ -241,6 +241,27 @@ app.post("/rounds", authMiddleware, (req, res) => {
   res.status(201).json(r);
 });
 
+// POST /admin/setup — one-time: make user admin and/or reset password (requires BIRDIE_SETUP_SECRET)
+app.post("/admin/setup", (req, res) => {
+  const secret = process.env.BIRDIE_SETUP_SECRET;
+  if (!secret) {
+    return res.status(503).json({ error: "Setup not configured" });
+  }
+  const { secret: bodySecret, username, password } = req.body || {};
+  if (bodySecret !== secret || !username) {
+    return res.status(401).json({ error: "Invalid setup" });
+  }
+  const u = String(username).trim().toLowerCase();
+  const row = db.prepare("SELECT id FROM users WHERE username = ?").get(u);
+  if (!row) return res.status(404).json({ error: "User not found" });
+  db.prepare("UPDATE users SET is_admin = 1 WHERE username = ?").run(u);
+  if (password && String(password).length >= 6) {
+    const hash = bcrypt.hashSync(password, 10);
+    db.prepare("UPDATE users SET password_hash = ? WHERE username = ?").run(hash, u);
+  }
+  res.json({ ok: true, message: `${u} is now admin${password ? ", password reset" : ""}` });
+});
+
 // GET /admin/users
 app.get("/admin/users", authMiddleware, adminMiddleware, (req, res) => {
   const rows = db.prepare(
