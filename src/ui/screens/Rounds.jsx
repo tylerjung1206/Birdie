@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 
-export default function Rounds({ rounds, onDelete }) {
+export default function Rounds({ rounds, onDelete, user }) {
   const [query, setQuery] = useState("");
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -8,13 +8,13 @@ export default function Rounds({ rounds, onDelete }) {
     if (!q) return items;
     return items.filter((r) => {
       return (
-        String(r.player ?? "").toLowerCase().includes(q) ||
-        String(r.course ?? "").toLowerCase().includes(q) ||
+        String(r.player || user?.username || "").toLowerCase().includes(q) ||
+        String((r.course && (r.course.name || r.course)) ?? "").toLowerCase().includes(q) ||
         String(r.date ?? "").toLowerCase().includes(q) ||
         String(r.score ?? "").toLowerCase().includes(q)
       );
     });
-  }, [rounds, query]);
+  }, [rounds, query, user]);
 
   return (
     <div className="grid">
@@ -50,8 +50,8 @@ export default function Rounds({ rounds, onDelete }) {
                 {filtered.map((r) => (
                   <tr key={r.id}>
                     <td>{r.date}</td>
-                    <td>{r.player || "—"}</td>
-                    <td>{r.course || "—"}</td>
+                    <td>{r.player || user?.username || "—"}</td>
+                    <td>{(r.course && (r.course.name || r.course)) || "—"}</td>
                     <td>{r.score ?? "—"}</td>
                     <td>{r.putts ?? "—"}</td>
                     <td>

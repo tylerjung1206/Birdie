@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 
-export default function Dashboard({ stats, rounds }) {
+export default function Dashboard({ stats, rounds, user }) {
   const recent = useMemo(() => {
     return [...(rounds ?? [])]
       .sort((a, b) => (a.date < b.date ? 1 : -1))
@@ -43,8 +43,8 @@ export default function Dashboard({ stats, rounds }) {
               {recent.map((r) => (
                 <tr key={r.id}>
                   <td>{r.date}</td>
-                  <td>{r.player || "—"}</td>
-                  <td>{r.course || "—"}</td>
+                  <td>{r.player || user?.username || "—"}</td>
+                  <td>{(r.course && (r.course.name || r.course)) || "—"}</td>
                   <td>{r.score ?? "—"}</td>
                   <td>{r.putts ?? "—"}</td>
                   <td>

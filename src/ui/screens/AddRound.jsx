@@ -1,11 +1,14 @@
 import React, { useMemo, useState } from "react";
+import CourseAutocomplete from "../components/CourseAutocomplete.jsx";
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
-export default function AddRound({ onAdd }) {
+export default function AddRound({ onAdd, user }) {
   const [player, setPlayer] = useState("Dad");
+  const isLoggedIn = Boolean(user);
   const [date, setDate] = useState(todayISO());
-  const [course, setCourse] = useState("");
+  const [courseText, setCourseText] = useState("");
+  const [coursePick, setCoursePick] = useState(null);
   const [score, setScore] = useState("");
   const [putts, setPutts] = useState("");
   const [gir, setGir] = useState("");
@@ -25,9 +28,15 @@ export default function AddRound({ onAdd }) {
     setSaving(true);
     try {
       await onAdd({
-        player: player.trim() || "Dad",
+        ...(isLoggedIn ? {} : { player: player.trim() || "Dad" }),
         date,
-        course: course.trim(),
+        course: coursePick
+          ? {
+              ...coursePick
+            }
+          : courseText.trim()
+            ? { name: courseText.trim() }
+            : null,
         score: toIntOrNull(score),
         putts: toIntOrNull(putts),
         gir: toIntOrNull(gir),
@@ -36,7 +45,8 @@ export default function AddRound({ onAdd }) {
         fairwaysTotal: toIntOrNull(fairwaysTotal) ?? 14,
         notes: notes.trim()
       });
-      setCourse("");
+      setCourseText("");
+      setCoursePick(null);
       setScore("");
       setPutts("");
       setGir("");
@@ -52,24 +62,32 @@ export default function AddRound({ onAdd }) {
       <div className="card wide">
         <h3>Round details</h3>
         <div className="row" style={{ marginTop: 10 }}>
-          <div className="field">
-            <label>Player</label>
-            <input
-              value={player}
-              onChange={(e) => setPlayer(e.target.value)}
-              placeholder="e.g. Dad"
-            />
-          </div>
+          {!isLoggedIn ? (
+            <div className="field">
+              <label>Player</label>
+              <input
+                value={player}
+                onChange={(e) => setPlayer(e.target.value)}
+                placeholder="e.g. Dad"
+              />
+            </div>
+          ) : null}
           <div className="field">
             <label>Date</label>
             <input value={date} onChange={(e) => setDate(e.target.value)} type="date" />
           </div>
           <div className="field">
             <label>Course</label>
-            <input
-              value={course}
-              onChange={(e) => setCourse(e.target.value)}
-              placeholder="e.g. Pebble Beach"
+            <CourseAutocomplete
+              value={coursePick}
+              onChange={(t) => {
+                setCourseText(t);
+                setCoursePick(null);
+              }}
+              onPick={(it) => {
+                setCoursePick(it);
+                setCourseText(it.name);
+              }}
             />
           </div>
           <div className="field">
@@ -148,7 +166,7 @@ export default function AddRound({ onAdd }) {
             {saving ? "Saving…" : "Save round"}
           </button>
           <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, alignSelf: "center" }}>
-            Stored locally on this computer.
+            {isLoggedIn ? "Synced to your account." : "Stored locally on this computer."}
           </div>
         </div>
       </div>

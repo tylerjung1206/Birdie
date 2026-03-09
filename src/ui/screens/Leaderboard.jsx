@@ -1,13 +1,14 @@
 import React, { useMemo, useState } from "react";
 
-export default function Leaderboard({ rounds }) {
+export default function Leaderboard({ rounds, user }) {
   const [metric, setMetric] = useState("avgScore");
+  const defaultPlayer = user?.username || "Dad";
 
   const rows = useMemo(() => {
     const byPlayer = new Map();
 
     for (const r of rounds ?? []) {
-      const player = (r.player || "Dad").trim() || "Dad";
+      const player = (r.player || defaultPlayer).trim() || defaultPlayer;
       if (!byPlayer.has(player)) {
         byPlayer.set(player, {
           player,

@@ -6,3 +6,13 @@ contextBridge.exposeInMainWorld("golfAPI", {
   deleteRound: (id) => ipcRenderer.invoke("rounds:delete", id)
 });
 
+contextBridge.exposeInMainWorld("birdieConfig", {
+  get: () => ipcRenderer.invoke("config:get"),
+  set: (opts) => ipcRenderer.invoke("config:set", opts),
+  logout: () => ipcRenderer.invoke("config:logout")
+});
+
+contextBridge.exposeInMainWorld("birdieAPI", {
+  request: (opts) => ipcRenderer.invoke("api:request", opts)
+});
+

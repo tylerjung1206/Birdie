@@ -259,6 +259,28 @@ textarea:focus {
   font-size: 12px;
 }
 
+.course-dropdown-item:hover {
+  background: rgba(41, 209, 127, 0.12);
+}
+
+.login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 360px;
+  background: linear-gradient(180deg, var(--panel), rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 32px;
+  box-shadow: 0 24px 80px var(--shadow);
+}
+
 @media (max-width: 960px) {
   .app {
     grid-template-columns: 1fr;

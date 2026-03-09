@@ -8,14 +8,18 @@
   "license": "UNLICENSED",
   "scripts": {
     "dev": "concurrently -k \"vite\" \"wait-on tcp:5173 && electron .\"",
+    "server": "cd backend && npm start",
+    "dev:all": "concurrently -k \"npm run server\" \"wait-on tcp:3001 && npm run dev\"",
     "build": "vite build",
     "preview": "vite preview",
     "dist": "npm run build && electron-builder --win --x64"
   },
   "dependencies": {
     "electron-store": "^9.0.0",
+    "leaflet": "^1.9.4",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-leaflet": "^4.2.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.1",
