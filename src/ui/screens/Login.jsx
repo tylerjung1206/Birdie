@@ -19,8 +19,11 @@ export default function Login({ onLogin }) {
   }, [configAvailable]);
 
   function saveApiUrl() {
-    const url = apiUrl.trim() || "http://localhost:3001";
-    setApiUrl(url);
+    let url = apiUrl.trim() || "http://localhost:3001";
+    if (url && !/^https?:\/\//i.test(url)) {
+      url = "https://" + url;
+      setApiUrl(url);
+    }
     window.birdieConfig.set({ apiUrl: url });
   }
 

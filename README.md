@@ -11,9 +11,21 @@ Golf stat tracker + analytics desktop app. Log rounds, compare with friends, vie
 
 ---
 
-## Mac — Install & Setup
+## For end users (share the app)
 
-### 1. Clone or download the project
+**Share with others:** Send the DMG (Mac) or exe (Windows) + this URL:
+
+```
+https://birdie-production-ec4b.up.railway.app
+```
+
+They install the app, enter the URL in **Server URL** on the login screen, register, and start using it. No backend setup needed.
+
+---
+
+## Mac — Build & Install
+
+### 1. Clone
 
 ```bash
 git clone https://github.com/tylerjung1206/Birdie.git
@@ -27,188 +39,140 @@ npm install
 cd backend && npm install && cd ..
 ```
 
-### 3. Build the app
+### 3. Build
 
 ```bash
 npm run dist:mac
 ```
 
-### 4. Install Birdie
+### 4. Install
 
-1. Open the `release/` folder.
-2. Double-click `Birdie-0.1.0.dmg`.
-3. Drag Birdie into the Applications folder.
-4. Open Birdie from Applications or Spotlight.
+1. Open `release/`
+2. Double-click `Birdie-0.1.0.dmg`
+3. Drag Birdie to Applications
+4. Open Birdie
 
-### 5. Start the backend (required for login)
-
-In a terminal:
+### 5. Backend (for local use)
 
 ```bash
-cd Birdie/backend
+cd backend
 npm start
 ```
 
-Leave this running. The backend listens at `http://localhost:3001`.
-
-### 6. First run in the app
-
-1. Open Birdie.
-2. Click **Register** and create an account.
-3. Log in and start adding rounds.
+Leave running. Default Server URL is `http://localhost:3001`.
 
 ---
 
-## Windows — Install & Setup
+## Windows — Build & Install
 
-### Option A: Build on your Windows PC
-
-#### 1. Clone or download the project
+### Option A: Build locally
 
 ```bash
 git clone https://github.com/tylerjung1206/Birdie.git
 cd Birdie
-```
-
-#### 2. Install dependencies
-
-```bash
 npm install
-cd backend
-npm install
-cd ..
-```
-
-#### 3. Build the installer
-
-```bash
+cd backend && npm install && cd ..
 npm run dist:win
 ```
 
-#### 4. Install Birdie
+Then run `Birdie Setup 0.1.0.exe` from `release/`.
 
-1. Open the `release/` folder.
-2. Run `Birdie Setup 0.1.0.exe`.
-3. Follow the installer (choose install location if prompted).
-4. Launch Birdie from the Start menu.
+### Option B: Pre-built (GitHub Actions)
 
-#### 5. Start the backend (required for login)
+1. [github.com/tylerjung1206/Birdie](https://github.com/tylerjung1206/Birdie) → **Actions**
+2. Latest run → **Artifacts** → download `windows-installer`
+3. Unzip and run the `.exe`
 
-In a separate terminal or Command Prompt:
-
-```bash
-cd Birdie\backend
-npm start
-```
-
-Leave this running.
-
-#### 6. First run in the app
-
-1. Open Birdie.
-2. Click **Register** and create an account.
-3. Log in and start adding rounds.
-
----
-
-### Option B: Download pre-built Windows installer (GitHub Actions)
-
-1. Go to [github.com/tylerjung1206/Birdie](https://github.com/tylerjung1206/Birdie).
-2. Click **Actions**.
-3. Open the latest workflow run (e.g. "Build Windows installer").
-4. Scroll to **Artifacts**.
-5. Download `windows-installer`.
-6. Unzip and run the `.exe` installer.
-7. Start the backend separately (see Option A, step 5).
-
----
-
-## Backend — Required for login & sync
-
-The app needs the backend running to log in, sync rounds, and search players.
-
-### Run locally
+### Backend (for local use)
 
 ```bash
 cd backend
 npm start
 ```
 
-- Runs at `http://localhost:3001` by default.
-- Uses SQLite (`birdie.db` in the backend folder).
+---
 
-### Environment variables (optional)
+## Server URL
 
-| Variable | Default | Description |
-|---------|---------|-------------|
-| `PORT` | `3001` | Server port |
-| `JWT_SECRET` | `birdie-dev-secret...` | **Set in production** for security |
-| `BIRDIE_DB` | `./birdie.db` | Path to SQLite file |
-
-Example:
-
-```bash
-PORT=3001 JWT_SECRET=your-secret-here node server.js
-```
-
-### Deploy for multiple users (Railway, Render, Fly.io, etc.)
-
-1. Deploy the `backend/` folder to your host.
-2. Set `JWT_SECRET` and optionally `BIRDIE_DB`.
-3. In the app, log in as an admin and go to **Admin**.
-4. Enter the backend URL (e.g. `https://your-app.railway.app`).
-5. Click **Save** and **Test connection**.
+- **Local:** Leave default `http://localhost:3001` or leave empty
+- **Deployed:** Enter the backend URL (e.g. `https://birdie-production-ec4b.up.railway.app`)
+- Enter on the **login screen** before registering or logging in
+- `https://` is auto-added if you omit it
 
 ---
 
-## Admin setup
+## Backend
 
-To change the API URL or manage users, you need admin access.
+### Local
 
-### Make a user admin (local backend)
+```bash
+cd backend
+npm start
+```
+
+Runs at `http://localhost:3001`. Uses SQLite (`birdie.db`).
+
+### Deploy to Railway
+
+See **DEPLOY-RAILWAY.md** for full steps. Summary:
+
+1. [railway.app](https://railway.app) → New Project → Deploy from GitHub
+2. Select Birdie repo, set **Root Directory** to `backend`
+3. Add variables: `JWT_SECRET`, optionally `BIRDIE_ADMIN_USERNAME`
+4. Generate domain, copy URL
+5. Share URL with users
+
+### Make yourself admin (deployed backend)
+
+**Option 1 — Setup endpoint**
+
+1. In Railway Variables, add `BIRDIE_SETUP_SECRET` = any secret string
+2. Redeploy
+3. Run:
+
+```bash
+curl -X POST https://birdie-production-ec4b.up.railway.app/admin/setup \
+  -H "Content-Type: application/json" \
+  -d '{"secret":"YOUR_SECRET","username":"YOUR_USERNAME","password":"NEW_PASSWORD"}'
+```
+
+4. Log in with the new password. Remove `BIRDIE_SETUP_SECRET` after.
+
+**Option 2 — Env var**
+
+Add `BIRDIE_ADMIN_USERNAME=yourusername` in Railway, redeploy, log out and back in.
+
+**Option 3 — Local script**
 
 ```bash
 cd backend
 node scripts/set-admin.js <username>
 ```
 
-Or set when starting the backend:
-
-```bash
-BIRDIE_ADMIN_USERNAME=yourusername npm start
-```
-
-### First admin
-
-1. Register a normal account in the app.
-2. Run `node scripts/set-admin.js <your-username>` in the backend folder.
-3. Log out and log back in — you’ll see the Admin tab.
+(Only works for local backend.)
 
 ---
 
-## API URL configuration
+## Environment variables
 
-- **Default:** `http://localhost:3001` (local backend).
-- **Change:** Only admins can change it in **Admin**.
-- **Format:** Full base URL, no trailing slash (e.g. `https://api.example.com`).
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `3001` | Server port |
+| `JWT_SECRET` | `birdie-dev-secret...` | **Required in production** |
+| `BIRDIE_DB` | `./birdie.db` | SQLite path |
+| `BIRDIE_ADMIN_USERNAME` | — | Auto-promote user to admin on startup |
+| `BIRDIE_SETUP_SECRET` | — | Enables `/admin/setup` for one-time admin + password reset |
 
 ---
 
 ## Troubleshooting
 
-### "Cannot connect to the server" / "fetch failed"
-
-- The backend is not running. Start it with `cd backend && npm start`.
-- Or the API URL is wrong — check Admin if using a deployed backend.
-
-### Backend won’t start
-
-- Ensure port 3001 is free.
-- On Windows, try `set PORT=3001 && npm start` if needed.
-
-### Course search not working
-
-- Course autocomplete uses OpenStreetMap (Overpass API). An internet connection is required.
+| Error | Fix |
+|-------|-----|
+| "Cannot connect" / "fetch failed" | Backend not running, or wrong Server URL |
+| "Invalid username or password" | Wrong credentials, or account exists on different backend (local vs Railway) |
+| "Username already taken" | Account exists; use correct password or register with new username |
+| "User not found" (setup) | Username doesn't exist on that backend; register first |
 
 ---
 
@@ -218,18 +182,7 @@ BIRDIE_ADMIN_USERNAME=yourusername npm start
 npm run dev
 ```
 
-- Starts Vite + Electron.
-- Backend auto-starts in dev if port 3001 is free.
-
-Or run backend manually:
-
-```bash
-# Terminal 1
-npm run server
-
-# Terminal 2
-npm run dev
-```
+Backend auto-starts in dev if port 3001 is free.
 
 ---
 
@@ -240,6 +193,13 @@ Birdie/
 ├── backend/          # Node/Express API (SQLite)
 ├── electron/         # Electron main process & preload
 ├── src/              # React UI
-├── public/           # Static assets (logo, etc.)
-└── release/          # Built installers (after npm run dist:mac or dist:win)
+├── public/           # Static assets (logo)
+├── release/          # Built installers
+└── DEPLOY-RAILWAY.md # Railway deployment guide
 ```
+
+---
+
+## Auto-update
+
+The app does **not** auto-update. Users install new versions manually.
