@@ -35,6 +35,7 @@
     "appId": "com.birdie.golftracker",
     "productName": "Birdie",
     "icon": "public/birdie-logo.png",
+    "publish": null,
     "directories": {
       "output": "release"
     },

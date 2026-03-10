@@ -200,6 +200,22 @@ Birdie/
 
 ---
 
+## Mobile app (Expo)
+
+A React Native mobile version lives in `mobile/`.
+
+```bash
+cd mobile
+npm install
+npm start
+```
+
+Press `i` for iOS simulator, `a` for Android, or scan the QR code with Expo Go.
+
+**Deploy to App Store / Play Store:** See `mobile/DEPLOY.md` for EAS Build instructions.
+
+---
+
 ## Auto-update
 
 The app does **not** auto-update. Users install new versions manually.
